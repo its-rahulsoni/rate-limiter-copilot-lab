@@ -1,0 +1,6 @@
+rate-limiter:
+  capacity: 10
+  refill-rate: 5
+  interceptor-enabled: true
+  aspect-enabled: true
+  strategy: token-bucket

@@ -17,7 +17,15 @@ public class RateLimiterFactory {
     }
 
     public RateLimiter createRateLimiter() {
-        // TODO: Return a new RateLimiter instance using the strategy, config, and clock
-        return null;
+        return new RateLimiter() {
+            @Override
+            public boolean allow() {
+                return check().isAllowed();
+            }
+            @Override
+            public com.example.ratelimiter.core.model.RateLimitResult check() {
+                return strategy.check(clock);
+            }
+        };
     }
 }

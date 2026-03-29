@@ -1,14 +1,14 @@
 package com.example.ratelimiter.core.exception;
 
 public class RateLimitExceededException extends RuntimeException {
-    private final long retryAfter;
+    private final double retryAfter;
 
-    public RateLimitExceededException(String message, long retryAfter) {
+    public RateLimitExceededException(String message, double retryAfter) {
         super(message);
         this.retryAfter = retryAfter;
     }
 
-    public long getRetryAfter() {
+    public double getRetryAfter() {
         return retryAfter;
     }
 }
