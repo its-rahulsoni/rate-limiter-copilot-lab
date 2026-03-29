@@ -50,44 +50,104 @@ The system is designed to be:
 Pure Java module containing all core rate limiting logic.
 No dependency on Spring or web frameworks.
 
-#### Package: `com.example.ratelimiter.core`
+---
 
-**Key Components:**
+### Package Structure
+
+com.example.ratelimiter.core
+
+* api
+* strategy
+* model
+* registry
+* factory
+* exception
+
+---
+
+### Key Components
+
+#### api
 
 * `RateLimiter` (interface)
-  Methods:
 
-    * `boolean allow(String key)`
-    * `RateLimitResult check(String key)`
+  * Represents a **per-key rate limiter instance (stateful)**
+  * Methods:
+
+    * `boolean allow()`
+    * `RateLimitResult check()`
+
+---
+
+#### strategy
 
 * `RateLimitingStrategy` (interface)
-  Defines algorithm behavior
 
-* `TokenBucketStrategy`
+  * Defines algorithm behavior
+  * Does NOT manage keys
 
-* `LeakyBucketStrategy`
+* Implementations:
 
-* `FixedWindowStrategy`
+  * `TokenBucketStrategy`
+  * `LeakyBucketStrategy`
+  * `FixedWindowStrategy`
 
-* `RateLimiterConfig`
-  Configuration object (builder pattern)
+---
 
-* `RateLimiterManager`
-  Manages per-key rate limiters
-  Uses Guava Cache (in-memory)
-
-* `ApiKeyResolver` (interface)
-  Resolves client key
+#### model
 
 * `RateLimitResult`
-  Fields:
+
+  * Fields:
 
     * allowed
     * retryAfter
-    * remainingTokens (optional)
-    * limit (optional)
+    * remainingTokens
+    * limit
+
+* `RateLimiterConfig`
+
+  * Configuration object (builder pattern)
+
+---
+
+#### registry
+
+* `RateLimiterRegistry`
+
+  * Manages per-key `RateLimiter` instances
+  * Uses Guava Cache (in-memory)
+  * Responsible for lifecycle of rate limiters
+
+---
+
+#### factory
+
+* `RateLimiterFactory`
+
+  * Creates `RateLimiter` instances
+  * Injects:
+
+    * strategy
+    * config
+    * Clock
+
+---
+
+#### exception
 
 * `RateLimitExceededException`
+
+---
+
+### Design Rules
+
+* Each key has its own `RateLimiter` instance
+* `RateLimiter` holds state (tokens, timestamps)
+* `RateLimitingStrategy` contains only algorithm logic
+* All time handling must use `java.time.Clock`
+* Implementation must be thread-safe
+* Lazy refill strategy for token bucket
 
 ---
 
