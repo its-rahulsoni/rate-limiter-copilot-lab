@@ -3,20 +3,24 @@ package com.example.ratelimiter.core.config;
 public class RateLimiterConfig {
     private final int capacity;
     private final double refillRate;
+    private final AlgorithmType algorithm;
 
     private RateLimiterConfig(Builder builder) {
         this.capacity = builder.capacity;
         this.refillRate = builder.refillRate;
+        this.algorithm = builder.algorithm;
     }
 
     public int getCapacity() { return capacity; }
     public double getRefillRate() { return refillRate; }
+    public AlgorithmType getAlgorithm() { return algorithm; }
 
     public static Builder builder() { return new Builder(); }
 
     public static class Builder {
         private int capacity;
         private double refillRate;
+        private AlgorithmType algorithm;
 
         public Builder capacity(int capacity) {
             this.capacity = capacity;
@@ -24,6 +28,10 @@ public class RateLimiterConfig {
         }
         public Builder refillRate(double refillRate) {
             this.refillRate = refillRate;
+            return this;
+        }
+        public Builder algorithm(AlgorithmType algorithm) {
+            this.algorithm = algorithm;
             return this;
         }
         public RateLimiterConfig build() {

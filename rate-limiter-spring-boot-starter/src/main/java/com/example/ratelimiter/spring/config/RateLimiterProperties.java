@@ -8,7 +8,7 @@ public class RateLimiterProperties {
     private double refillRate;
     private Boolean interceptorEnabled;
     private Boolean aspectEnabled;
-    private String strategy;
+    private String algorithm; // Remains String for YAML binding, but only for conversion to enum in config
     // ...other properties
 
     public int getCapacity() { return capacity; }
@@ -19,7 +19,7 @@ public class RateLimiterProperties {
     public void setInterceptorEnabled(Boolean interceptorEnabled) { this.interceptorEnabled = interceptorEnabled; }
     public Boolean getAspectEnabled() { return aspectEnabled; }
     public void setAspectEnabled(Boolean aspectEnabled) { this.aspectEnabled = aspectEnabled; }
-    public String getStrategy() { return strategy; }
-    public void setStrategy(String strategy) { this.strategy = strategy; }
+    public String getAlgorithm() { return algorithm; }
+    public void setAlgorithm(String algorithm) { this.algorithm = algorithm; }
     // ...other getters/setters
 }

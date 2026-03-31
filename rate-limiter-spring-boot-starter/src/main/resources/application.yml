@@ -3,4 +3,4 @@ rate-limiter:
   refill-rate: 5
   interceptor-enabled: true
   aspect-enabled: true
-  strategy: token-bucket
+  algorithm: token-bucket

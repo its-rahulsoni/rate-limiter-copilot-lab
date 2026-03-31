@@ -11,10 +11,8 @@ import com.example.ratelimiter.core.registry.RateLimiterRegistry;
 import com.example.ratelimiter.core.factory.RateLimiterFactory;
 import com.example.ratelimiter.spring.web.RateLimitInterceptor;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import com.example.ratelimiter.core.strategy.RateLimitingStrategy;
-import com.example.ratelimiter.core.strategy.TokenBucketStrategy;
 import com.example.ratelimiter.core.config.RateLimiterConfig;
-import java.time.Clock;
+import com.example.ratelimiter.core.config.AlgorithmType;
 
 @Configuration
 @EnableConfigurationProperties(RateLimiterProperties.class)
@@ -32,20 +30,24 @@ public class RateLimiterAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
     public RateLimiterFactory rateLimiterFactory(RateLimiterProperties properties) {
+        AlgorithmType algorithmType;
+        String algoStr = properties.getAlgorithm();
+        if (algoStr == null) {
+            algorithmType = AlgorithmType.TOKEN_BUCKET;
+        } else {
+            try {
+                algorithmType = AlgorithmType.valueOf(algoStr.trim().toUpperCase());
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Invalid algorithm type: " + algoStr, e);
+            }
+        }
         RateLimiterConfig config = RateLimiterConfig.builder()
                 .capacity(properties.getCapacity())
                 .refillRate(properties.getRefillRate())
+                .algorithm(algorithmType)
                 .build();
-        String strategyType = properties.getStrategy();
-        RateLimitingStrategy strategy;
-        if ("token-bucket".equalsIgnoreCase(strategyType) || strategyType == null) {
-            strategy = new TokenBucketStrategy(config, Clock.systemUTC());
-        } else {
-            throw new IllegalArgumentException("Unsupported rate limiting strategy: " + strategyType);
-        }
-        return new RateLimiterFactory(strategy, config, Clock.systemUTC());
+        return new RateLimiterFactory(config, java.time.Clock.systemUTC());
     }
 
     @Bean

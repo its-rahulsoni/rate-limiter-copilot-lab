@@ -1,5 +1,6 @@
 package com.example.ratelimiter.core.strategy;
 
+import com.example.ratelimiter.core.api.RateLimiter;
 import com.example.ratelimiter.core.model.RateLimitResult;
 import com.example.ratelimiter.core.config.RateLimiterConfig;
 import java.time.Clock;
@@ -7,16 +8,17 @@ import java.time.Instant;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Thread-safe, lazy-refill Token Bucket RateLimiter implementation.
+ * Per-key, stateful Token Bucket RateLimiter implementation.
  */
-public class TokenBucketStrategy implements RateLimitingStrategy {
+public class TokenBucketRateLimiter implements RateLimiter {
     private final int capacity;
     private final double refillRate; // tokens per second
     private double tokens;
     private Instant lastRefillTime;
+    private final Clock clock;
     private final ReentrantLock lock = new ReentrantLock();
 
-    public TokenBucketStrategy(RateLimiterConfig config, Clock clock) {
+    public TokenBucketRateLimiter(RateLimiterConfig config, Clock clock) {
         if (config.getCapacity() <= 0) {
             throw new IllegalArgumentException("Token bucket capacity must be > 0");
         }
@@ -27,10 +29,16 @@ public class TokenBucketStrategy implements RateLimitingStrategy {
         this.refillRate = config.getRefillRate();
         this.tokens = capacity;
         this.lastRefillTime = clock.instant();
+        this.clock = clock;
     }
 
     @Override
-    public RateLimitResult check(Clock clock) {
+    public boolean allow() {
+        return check().isAllowed();
+    }
+
+    @Override
+    public RateLimitResult check() {
         lock.lock();
         try {
             Instant now = clock.instant();
