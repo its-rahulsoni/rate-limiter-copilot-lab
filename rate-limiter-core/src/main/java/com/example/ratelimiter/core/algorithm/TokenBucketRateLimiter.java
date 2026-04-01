@@ -1,4 +1,4 @@
-package com.example.ratelimiter.core.strategy;
+package com.example.ratelimiter.core.algorithm;
 
 import com.example.ratelimiter.core.api.RateLimiter;
 import com.example.ratelimiter.core.model.RateLimitResult;
@@ -42,26 +42,44 @@ public class TokenBucketRateLimiter implements RateLimiter {
         lock.lock();
         try {
             Instant now = clock.instant();
-            double elapsedSeconds = (now.toEpochMilli() - lastRefillTime.toEpochMilli()) / 1000.0;
-            if (elapsedSeconds > 0) {
-                double tokensToAdd = elapsedSeconds * refillRate;
-                tokens = Math.min(capacity, tokens + tokensToAdd);
-                lastRefillTime = lastRefillTime.plusMillis((long)(elapsedSeconds * 1000));
+
+            double elapsedTime =
+                    (now.toEpochMilli() - lastRefillTime.toEpochMilli()) / 1000.0;
+
+            if (elapsedTime < 0) {
+                elapsedTime = 0;
             }
+
+            if (elapsedTime > 0) {
+                double tokensToAdd = elapsedTime * refillRate;
+                tokens = Math.min(capacity, tokens + tokensToAdd);
+
+                // FIX: always set to now
+                lastRefillTime = now;
+            }
+
             boolean allowed = tokens >= 1.0;
             double retryAfter = 0;
+
             if (allowed) {
                 tokens -= 1.0;
             } else {
                 double tokensNeeded = 1.0 - tokens;
-                retryAfter = tokensNeeded / refillRate;
+
+                if (refillRate > 0) {
+                    retryAfter = tokensNeeded / refillRate;
+                } else {
+                    retryAfter = Double.MAX_VALUE;
+                }
             }
+
             return new RateLimitResult(
-                allowed,
-                retryAfter,
-                (int) Math.floor(tokens),
-                capacity
+                    allowed,
+                    retryAfter,
+                    (int) Math.floor(tokens),
+                    capacity
             );
+
         } finally {
             lock.unlock();
         }

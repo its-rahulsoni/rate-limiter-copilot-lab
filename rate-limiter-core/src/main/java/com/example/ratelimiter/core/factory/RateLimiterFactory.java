@@ -1,11 +1,9 @@
 package com.example.ratelimiter.core.factory;
 
 import com.example.ratelimiter.core.api.RateLimiter;
-import com.example.ratelimiter.core.strategy.TokenBucketRateLimiter;
+import com.example.ratelimiter.core.algorithm.TokenBucketRateLimiter;
 import com.example.ratelimiter.core.config.RateLimiterConfig;
 import com.example.ratelimiter.core.config.AlgorithmType;
-// import com.example.ratelimiter.core.strategy.FixedWindowRateLimiter;
-// import com.example.ratelimiter.core.strategy.LeakyBucketRateLimiter;
 import java.time.Clock;
 
 public class RateLimiterFactory {
